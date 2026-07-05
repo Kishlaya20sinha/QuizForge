@@ -4,9 +4,34 @@
   box-sizing: border-box;
 }
 
+:root {
+  --green-primary: #1d9e75;
+  --green-light: #e1f5ee;
+  --green-dark: #0f6e56;
+  --purple-primary: #534ab7;
+  --purple-light: #eeedfe;
+  --purple-dark: #3c3489;
+  --bg-page: #f8f7f4;
+  --bg-card: #ffffff;
+  --border: #e8e6e0;
+  --text-primary: #2d2d2a;
+  --text-secondary: #5f5e5a;
+  --text-muted: #888780;
+  --sidebar-width: 200px;
+}
+
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #0f0f1a;
-  color: #ffffff;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
   min-height: 100vh;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+input, select, textarea {
+  font-family: inherit;
 }

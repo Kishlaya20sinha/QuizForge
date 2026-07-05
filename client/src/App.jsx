@@ -4,6 +4,9 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import DashboardPage from './pages/DashboardPage';
 import SoloQuizPage from './pages/SoloQuizPage';
+import LobbyPage from './pages/LobbyPage';
+import MultiplayerQuizPage from './pages/MultiplayerQuizPage';
+import GameOverPage from './pages/GameOverPage';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -26,6 +29,21 @@ function App() {
         <Route path="/solo" element={
           <ProtectedRoute>
             <SoloQuizPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/room/lobby" element={
+          <ProtectedRoute>
+            <LobbyPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/multiplayer" element={
+          <ProtectedRoute>
+            <MultiplayerQuizPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/game-over" element={
+          <ProtectedRoute>
+            <GameOverPage />
           </ProtectedRoute>
         } />
         <Route path="/" element={<Navigate to="/login" />} />

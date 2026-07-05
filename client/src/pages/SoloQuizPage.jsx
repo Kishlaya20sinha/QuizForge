@@ -9,7 +9,7 @@ const SoloQuizPage = () => {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
-  const [result, setResult] = useState(null); // { isCorrect, correctAnswerIndex, explanation }
+  const [result, setResult] = useState(null);
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -18,32 +18,25 @@ const SoloQuizPage = () => {
   const questions = session?.questions || [];
   const currentQuestion = questions[currentIndex];
 
-  // Redirect if no session
   useEffect(() => {
     if (!session) navigate('/dashboard');
   }, [session, navigate]);
 
-  // Timer
   useEffect(() => {
     if (result || finished) return;
-    if (timeLeft === 0) {
-      handleSubmit(null); // auto-submit with no answer when time runs out
-      return;
-    }
+    if (timeLeft === 0) { handleSubmit(null); return; }
     const timer = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearTimeout(timer);
   }, [timeLeft, result, finished]);
 
-  // Reset timer on new question
   useEffect(() => {
     setTimeLeft(20);
   }, [currentIndex]);
 
   const handleSubmit = async (selectedIndex) => {
-    if (result) return; // already answered
+    if (result) return;
     setSelectedOption(selectedIndex);
     setLoading(true);
-
     try {
       const res = await api.post('/quiz/solo/answer', {
         sessionId: session.sessionId,
@@ -61,7 +54,6 @@ const SoloQuizPage = () => {
 
   const handleNext = async () => {
     if (currentIndex + 1 >= questions.length) {
-      // Last question - finish quiz
       try {
         await api.post('/quiz/solo/finish', { sessionId: session.sessionId });
       } catch (err) {
@@ -77,37 +69,31 @@ const SoloQuizPage = () => {
 
   const getOptionStyle = (index) => {
     if (!result) {
-      return {
-        ...styles.option,
-        ...(selectedOption === index ? styles.optionSelected : {}),
-      };
+      return { ...styles.option, ...(selectedOption === index ? styles.optionSelected : {}) };
     }
     if (index === result.correctAnswerIndex) return { ...styles.option, ...styles.optionCorrect };
     if (index === selectedOption && !result.isCorrect) return { ...styles.option, ...styles.optionWrong };
-    return { ...styles.option, ...styles.optionDisabled };
+    return { ...styles.option, ...styles.optionDim };
   };
 
-  // Finished screen
   if (finished) {
     const total = questions.length;
     const percentage = Math.round((score / (total * 10)) * 100);
     return (
-      <div style={styles.container}>
+      <div style={styles.fullPage}>
         <div style={styles.finishCard}>
           <div style={styles.finishEmoji}>
             {percentage >= 80 ? '🏆' : percentage >= 50 ? '👍' : '💪'}
           </div>
-          <h2 style={styles.finishTitle}>Quiz Complete!</h2>
-          <div style={styles.scoreCircle}>
-            <span style={styles.scoreNumber}>{score}</span>
-            <span style={styles.scoreTotal}>/ {total * 10}</span>
+          <h2 style={styles.finishTitle}>Quiz complete!</h2>
+          <div style={styles.scoreBig}>
+            <span style={styles.scoreNum}>{score}</span>
+            <span style={styles.scoreMax}>/ {total * 10}</span>
           </div>
           <p style={styles.scorePercent}>{percentage}% correct</p>
-          <div style={styles.finishButtons}>
-            <button style={styles.primaryBtn} onClick={() => navigate('/dashboard')}>
-              🏠 Back to Dashboard
-            </button>
-          </div>
+          <button style={styles.primaryBtn} onClick={() => navigate('/dashboard')}>
+            Back to dashboard
+          </button>
         </div>
       </div>
     );
@@ -115,32 +101,34 @@ const SoloQuizPage = () => {
 
   if (!currentQuestion) return null;
 
+  const timerPercent = (timeLeft / 20) * 100;
+
   return (
-    <div style={styles.container}>
+    <div style={styles.fullPage}>
       <div style={styles.quizCard}>
         {/* Header */}
         <div style={styles.quizHeader}>
-          <span style={styles.progress}>
+          <span style={styles.progressText}>
             Question {currentIndex + 1} / {questions.length}
           </span>
-          <div style={{ ...styles.timer, ...(timeLeft <= 5 ? styles.timerDanger : {}) }}>
+          <div style={{ ...styles.timerBadge, ...(timeLeft <= 5 ? styles.timerDanger : {}) }}>
             ⏱ {timeLeft}s
           </div>
-          <span style={styles.scoreDisplay}>Score: {score}</span>
+          <span style={styles.scoreBadge}>Score: {score}</span>
         </div>
 
-        {/* Progress bar */}
-        <div style={styles.progressBar}>
+        {/* Timer bar */}
+        <div style={styles.timerBarBg}>
           <div style={{
-            ...styles.progressFill,
-            width: `${((currentIndex) / questions.length) * 100}%`
+            ...styles.timerBarFill,
+            width: `${timerPercent}%`,
+            background: timeLeft <= 5 ? '#dc2626' : 'var(--green-primary)',
+            transition: 'width 1s linear',
           }} />
         </div>
 
         {/* Question */}
-        <div style={styles.questionBox}>
-          <p style={styles.question}>{currentQuestion.question}</p>
-        </div>
+        <p style={styles.question}>{currentQuestion.question}</p>
 
         {/* Options */}
         <div style={styles.options}>
@@ -154,23 +142,26 @@ const SoloQuizPage = () => {
               <span style={styles.optionLabel}>
                 {['A', 'B', 'C', 'D'][index]}
               </span>
-              {option}
+              <span>{option}</span>
             </button>
           ))}
         </div>
 
-        {/* Explanation after answer */}
+        {/* Explanation */}
         {result && (
-          <div style={{ ...styles.explanation, ...(result.isCorrect ? styles.explanationCorrect : styles.explanationWrong) }}>
+          <div style={{
+            ...styles.explanation,
+            ...(result.isCorrect ? styles.explanationCorrect : styles.explanationWrong),
+          }}>
             <strong>{result.isCorrect ? '✅ Correct!' : '❌ Wrong!'}</strong>
-            <p style={{ marginTop: '6px', fontSize: '14px' }}>{result.explanation}</p>
+            <p style={{ marginTop: '6px', fontSize: '13px' }}>{result.explanation}</p>
           </div>
         )}
 
         {/* Next button */}
         {result && (
-          <button style={styles.nextBtn} onClick={handleNext}>
-            {currentIndex + 1 >= questions.length ? '🏁 Finish Quiz' : 'Next Question ➡'}
+          <button style={styles.primaryBtn} onClick={handleNext}>
+            {currentIndex + 1 >= questions.length ? 'Finish quiz' : 'Next question →'}
           </button>
         )}
       </div>
@@ -179,21 +170,21 @@ const SoloQuizPage = () => {
 };
 
 const styles = {
-  container: {
+  fullPage: {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%)',
+    background: 'var(--bg-page)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '20px',
+    padding: '24px',
   },
   quizCard: {
-    background: '#16213e',
-    borderRadius: '16px',
+    background: 'var(--bg-card)',
+    border: '1px solid var(--border)',
+    borderRadius: '14px',
     padding: '32px',
     width: '100%',
-    maxWidth: '640px',
-    boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+    maxWidth: '620px',
   },
   quizHeader: {
     display: 'flex',
@@ -201,171 +192,154 @@ const styles = {
     alignItems: 'center',
     marginBottom: '12px',
   },
-  progress: {
-    color: '#a8b2d8',
-    fontSize: '14px',
+  progressText: {
+    fontSize: '13px',
+    color: 'var(--text-muted)',
   },
-  timer: {
-    background: '#0f0f1a',
+  timerBadge: {
+    background: 'var(--green-light)',
+    color: 'var(--green-dark)',
     borderRadius: '20px',
-    padding: '6px 16px',
-    color: '#a8b2d8',
-    fontWeight: 'bold',
-    fontSize: '16px',
+    padding: '4px 14px',
+    fontSize: '14px',
+    fontWeight: '500',
   },
   timerDanger: {
-    color: '#e94560',
-    background: '#e9456022',
+    background: '#fef2f2',
+    color: '#dc2626',
   },
-  scoreDisplay: {
-    color: '#a8b2d8',
-    fontSize: '14px',
+  scoreBadge: {
+    fontSize: '13px',
+    color: 'var(--text-muted)',
   },
-  progressBar: {
-    background: '#0f0f1a',
+  timerBarBg: {
+    background: 'var(--bg-page)',
     borderRadius: '4px',
-    height: '6px',
+    height: '5px',
     marginBottom: '24px',
     overflow: 'hidden',
   },
-  progressFill: {
-    background: 'linear-gradient(90deg, #e94560, #c23152)',
+  timerBarFill: {
     height: '100%',
     borderRadius: '4px',
-    transition: 'width 0.3s ease',
-  },
-  questionBox: {
-    marginBottom: '24px',
   },
   question: {
-    fontSize: '20px',
-    fontWeight: 'bold',
-    color: '#ffffff',
+    fontSize: '19px',
+    fontWeight: '600',
+    color: 'var(--text-primary)',
     lineHeight: '1.5',
+    marginBottom: '20px',
   },
   options: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px',
+    gap: '10px',
     marginBottom: '20px',
   },
   option: {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
-    background: '#0f0f1a',
-    border: '2px solid #2a2a4a',
+    background: 'var(--bg-page)',
+    border: '1px solid var(--border)',
     borderRadius: '10px',
     padding: '14px 16px',
-    color: '#ffffff',
-    fontSize: '15px',
+    color: 'var(--text-primary)',
+    fontSize: '14px',
     cursor: 'pointer',
     textAlign: 'left',
-    transition: 'all 0.2s',
   },
   optionSelected: {
-    border: '2px solid #e94560',
-    background: '#e9456022',
+    border: '1.5px solid var(--green-primary)',
+    background: 'var(--green-light)',
   },
   optionCorrect: {
-    border: '2px solid #00c853',
-    background: '#00c85322',
-    color: '#00c853',
+    border: '1.5px solid #16a34a',
+    background: '#f0fdf4',
+    color: '#15803d',
   },
   optionWrong: {
-    border: '2px solid #e94560',
-    background: '#e9456022',
-    color: '#e94560',
+    border: '1.5px solid #dc2626',
+    background: '#fef2f2',
+    color: '#dc2626',
   },
-  optionDisabled: {
-    opacity: 0.5,
+  optionDim: {
+    opacity: 0.45,
     cursor: 'not-allowed',
   },
   optionLabel: {
-    background: '#2a2a4a',
+    background: 'var(--border)',
     borderRadius: '6px',
     padding: '2px 8px',
-    fontSize: '13px',
-    fontWeight: 'bold',
-    minWidth: '24px',
+    fontSize: '12px',
+    fontWeight: '600',
+    minWidth: '22px',
     textAlign: 'center',
+    color: 'var(--text-secondary)',
+    flexShrink: 0,
   },
   explanation: {
     borderRadius: '10px',
     padding: '14px',
     marginBottom: '16px',
+    fontSize: '14px',
   },
   explanationCorrect: {
-    background: '#00c85322',
-    border: '1px solid #00c853',
-    color: '#00c853',
+    background: '#f0fdf4',
+    border: '1px solid #86efac',
+    color: '#15803d',
   },
   explanationWrong: {
-    background: '#e9456022',
-    border: '1px solid #e94560',
-    color: '#e94560',
+    background: '#fef2f2',
+    border: '1px solid #fca5a5',
+    color: '#dc2626',
   },
-  nextBtn: {
+  primaryBtn: {
     width: '100%',
-    background: 'linear-gradient(135deg, #e94560, #c23152)',
+    background: 'var(--green-primary)',
     border: 'none',
     borderRadius: '8px',
-    padding: '14px',
+    padding: '12px',
     color: '#ffffff',
-    fontSize: '16px',
-    fontWeight: 'bold',
+    fontSize: '14px',
+    fontWeight: '500',
     cursor: 'pointer',
   },
   finishCard: {
-    background: '#16213e',
-    borderRadius: '16px',
-    padding: '48px 32px',
+    background: 'var(--bg-card)',
+    border: '1px solid var(--border)',
+    borderRadius: '14px',
+    padding: '48px 40px',
+    maxWidth: '420px',
     width: '100%',
-    maxWidth: '480px',
     textAlign: 'center',
-    boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
   },
   finishEmoji: {
-    fontSize: '64px',
+    fontSize: '56px',
     marginBottom: '16px',
   },
   finishTitle: {
-    fontSize: '28px',
-    fontWeight: 'bold',
-    color: '#ffffff',
-    marginBottom: '24px',
+    fontSize: '24px',
+    fontWeight: '600',
+    color: 'var(--text-primary)',
+    marginBottom: '20px',
   },
-  scoreCircle: {
+  scoreBig: {
     marginBottom: '8px',
   },
-  scoreNumber: {
-    fontSize: '64px',
-    fontWeight: 'bold',
-    color: '#e94560',
+  scoreNum: {
+    fontSize: '56px',
+    fontWeight: '700',
+    color: 'var(--green-primary)',
   },
-  scoreTotal: {
-    fontSize: '24px',
-    color: '#a8b2d8',
+  scoreMax: {
+    fontSize: '20px',
+    color: 'var(--text-muted)',
   },
   scorePercent: {
-    color: '#a8b2d8',
-    marginBottom: '32px',
-    fontSize: '18px',
-  },
-  finishButtons: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-  },
-  primaryBtn: {
-    background: 'linear-gradient(135deg, #e94560, #c23152)',
-    border: 'none',
-    borderRadius: '8px',
-    padding: '14px',
-    color: '#ffffff',
     fontSize: '16px',
-    fontWeight: 'bold',
-    cursor: 'pointer',
+    color: 'var(--text-muted)',
+    marginBottom: '32px',
   },
 };
 
