@@ -116,3 +116,23 @@ exports.finishSoloQuiz = async (req, res) => {
     res.status(500).json({ message: 'Failed to finish quiz' });
   }
 };
+
+exports.getUserStats = async (req, res) => {
+  try {
+    const sessions = await QuizSession.find({
+      user: req.user.userId,
+      status: 'completed'
+    });
+
+    const totalPlayed = sessions.length;
+    const bestScore = sessions.length > 0
+      ? Math.max(...sessions.map(s => s.score))
+      : 0;
+    const uniqueTopics = new Set(sessions.map(s => s.topic)).size;
+
+    res.status(200).json({ totalPlayed, bestScore, uniqueTopics });
+  } catch (err) {
+    console.error('Get stats error:', err);
+    res.status(500).json({ message: 'Failed to fetch stats' });
+  }
+};

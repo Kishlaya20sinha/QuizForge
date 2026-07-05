@@ -16,15 +16,12 @@ const Layout = ({ children }) => {
     logout();
     navigate('/login');
   };
-const isActive = location.pathname + location.search === item.path ||
-  (item.path === '/dashboard' && location.pathname === '/dashboard' && !location.search);
+
   const initials = user?.username?.charAt(0).toUpperCase() || 'U';
 
   return (
     <div style={styles.wrapper}>
-      {/* Sidebar */}
       <aside style={styles.sidebar}>
-        {/* Logo */}
         <div style={styles.logoArea}>
           <div style={styles.logoIcon}>Q</div>
           <div>
@@ -33,10 +30,13 @@ const isActive = location.pathname + location.search === item.path ||
           </div>
         </div>
 
-        {/* Nav */}
         <nav style={styles.nav}>
           {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            const isActive =
+              location.pathname + location.search === item.path ||
+              (item.path === '/dashboard' &&
+                location.pathname === '/dashboard' &&
+                !location.search);
             return (
               <button
                 key={item.path}
@@ -53,7 +53,6 @@ const isActive = location.pathname + location.search === item.path ||
           })}
         </nav>
 
-        {/* User info at bottom */}
         <div style={styles.userArea}>
           <div style={styles.divider} />
           <div style={styles.userInfo}>
@@ -68,7 +67,6 @@ const isActive = location.pathname + location.search === item.path ||
         </div>
       </aside>
 
-      {/* Main content */}
       <main style={styles.main}>
         {children}
       </main>
@@ -143,7 +141,7 @@ const styles = {
     fontWeight: '400',
     textAlign: 'left',
     width: '100%',
-    transition: 'all 0.15s',
+    cursor: 'pointer',
   },
   navItemActive: {
     background: 'var(--green-light)',
