@@ -16,7 +16,6 @@ const LoginPage = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
       const res = await api.post('/auth/login', { email, password });
       login(res.data.user, res.data.token);
@@ -29,116 +28,218 @@ const LoginPage = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.logo}>⚡ QuizForge</h1>
-        <h2 style={styles.title}>Welcome Back</h2>
+    <div style={styles.page}>
+      <div style={styles.left}>
+        <div style={styles.brand}>
+          <div style={styles.logoIcon}>Q</div>
+          <span style={styles.logoText}>QuizForge</span>
+        </div>
+        <h1 style={styles.tagline}>Forge your knowledge,<br />one quiz at a time.</h1>
+        <p style={styles.taglineSub}>AI-generated quizzes on any topic. Play solo or challenge friends in real-time multiplayer rooms.</p>
+        <div style={styles.features}>
+          <div style={styles.featureItem}>
+            <span style={styles.featureIcon}>🧠</span>
+            <span>AI generates fresh questions instantly</span>
+          </div>
+          <div style={styles.featureItem}>
+            <span style={styles.featureIcon}>⚡</span>
+            <span>Real-time multiplayer with live leaderboards</span>
+          </div>
+          <div style={styles.featureItem}>
+            <span style={styles.featureIcon}>📊</span>
+            <span>Track your progress across topics</span>
+          </div>
+        </div>
+      </div>
 
-        {error && <div style={styles.error}>{error}</div>}
+      <div style={styles.right}>
+        <div style={styles.card}>
+          <h2 style={styles.title}>Welcome back</h2>
+          <p style={styles.subtitle}>Sign in to your account</p>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <input
-            style={styles.input}
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            style={styles.input}
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <button style={styles.button} type="submit" disabled={loading}>
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
+          {error && <div style={styles.error}>{error}</div>}
 
-        <p style={styles.switchText}>
-          Don't have an account?{' '}
-          <Link to="/signup" style={styles.link}>Sign up</Link>
-        </p>
+          <form onSubmit={handleSubmit} style={styles.form}>
+            <div style={styles.fieldGroup}>
+              <label style={styles.label}>Email</label>
+              <input
+                style={styles.input}
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div style={styles.fieldGroup}>
+              <label style={styles.label}>Password</label>
+              <input
+                style={styles.input}
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <button style={styles.btn} type="submit" disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign in'}
+            </button>
+          </form>
+
+          <p style={styles.switchText}>
+            Don't have an account?{' '}
+            <Link to="/signup" style={styles.link}>Create one</Link>
+          </p>
+        </div>
       </div>
     </div>
   );
 };
 
 const styles = {
-  container: {
+  page: {
     minHeight: '100vh',
+    display: 'flex',
+    background: 'var(--bg-page)',
+  },
+  left: {
+    flex: 1,
+    background: '#1a1a2e',
+    padding: '48px',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+  },
+  brand: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    marginBottom: '48px',
+  },
+  logoIcon: {
+    width: '36px',
+    height: '36px',
+    background: 'var(--green-primary)',
+    borderRadius: '10px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: 'linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%)',
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: '18px',
+  },
+  logoText: {
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#ffffff',
+  },
+  tagline: {
+    fontSize: '36px',
+    fontWeight: '700',
+    color: '#ffffff',
+    lineHeight: '1.3',
+    marginBottom: '16px',
+  },
+  taglineSub: {
+    fontSize: '15px',
+    color: '#a8b2d8',
+    lineHeight: '1.6',
+    marginBottom: '40px',
+    maxWidth: '400px',
+  },
+  features: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+  },
+  featureItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    color: '#a8b2d8',
+    fontSize: '14px',
+  },
+  featureIcon: {
+    fontSize: '20px',
+    width: '28px',
+  },
+  right: {
+    width: '480px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '48px',
   },
   card: {
-    background: '#16213e',
-    borderRadius: '16px',
-    padding: '40px',
     width: '100%',
-    maxWidth: '400px',
-    boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-  },
-  logo: {
-    textAlign: 'center',
-    fontSize: '28px',
-    marginBottom: '8px',
-    color: '#e94560',
+    maxWidth: '380px',
   },
   title: {
-    textAlign: 'center',
-    fontSize: '20px',
-    marginBottom: '24px',
-    color: '#a8b2d8',
+    fontSize: '24px',
+    fontWeight: '600',
+    color: 'var(--text-primary)',
+    marginBottom: '4px',
+  },
+  subtitle: {
+    fontSize: '14px',
+    color: 'var(--text-muted)',
+    marginBottom: '28px',
   },
   error: {
-    background: '#ff000022',
-    border: '1px solid #ff4444',
+    background: '#fef2f2',
+    border: '1px solid #fca5a5',
     borderRadius: '8px',
-    padding: '10px',
+    padding: '10px 14px',
     marginBottom: '16px',
-    color: '#ff4444',
-    fontSize: '14px',
+    color: '#dc2626',
+    fontSize: '13px',
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
     gap: '16px',
   },
+  fieldGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+  },
+  label: {
+    fontSize: '12px',
+    fontWeight: '500',
+    color: 'var(--text-secondary)',
+  },
   input: {
-    background: '#0f0f1a',
-    border: '1px solid #2a2a4a',
+    background: 'var(--bg-card)',
+    border: '1px solid var(--border)',
     borderRadius: '8px',
-    padding: '12px 16px',
-    color: '#ffffff',
-    fontSize: '16px',
+    padding: '10px 14px',
+    color: 'var(--text-primary)',
+    fontSize: '14px',
     outline: 'none',
   },
-  button: {
-    background: 'linear-gradient(135deg, #e94560, #c23152)',
+  btn: {
+    background: 'var(--green-primary)',
     border: 'none',
     borderRadius: '8px',
-    padding: '14px',
+    padding: '12px',
     color: '#ffffff',
-    fontSize: '16px',
-    fontWeight: 'bold',
+    fontSize: '14px',
+    fontWeight: '500',
     cursor: 'pointer',
-    marginTop: '8px',
+    marginTop: '4px',
   },
   switchText: {
     textAlign: 'center',
     marginTop: '20px',
-    color: '#a8b2d8',
-    fontSize: '14px',
+    color: 'var(--text-muted)',
+    fontSize: '13px',
   },
   link: {
-    color: '#e94560',
+    color: 'var(--green-primary)',
     textDecoration: 'none',
-    fontWeight: 'bold',
+    fontWeight: '500',
   },
 };
 
